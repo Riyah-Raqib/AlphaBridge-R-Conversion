@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-# 
-# Created on Wed Feb 7 16:53:05 2024
-# 
-# @author: Dan_salv
-
-# Load required libraries
+# ==============================
+# Load Required Libraries
+# ==============================
 library(httr)
 library(jsonlite)
 library(R6)

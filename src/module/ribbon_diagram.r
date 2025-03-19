@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-# 
-# Created on Wed Feb 7 16:53:05 2024
-# 
-# @author: Dan_salv
-
-# Required dependencies and imports
+# ==============================
+# Load Required Libraries
+# ==============================
 library(R6)
 library(circlize)
 library(RColorBrewer)

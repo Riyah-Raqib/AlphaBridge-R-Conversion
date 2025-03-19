@@ -1,10 +1,13 @@
+# ==============================
+# Load Required Libraries
+# ==============================
 library(EBImage)
 library(igraph)
 library(R6)
 library(dplyr)
 
-source("src/module/parsers.R")
-source("src/module/alingment_utils.R")
+source("parsers.R")
+source("alignment_utils.R")
 
 # Define protein_letters_1to3 based on Bio.Data.IUPACData equivalent
 protein_letters_1to3 <- c(A="ALA", C="CYS", D="ASP", E="GLU", F="PHE", 

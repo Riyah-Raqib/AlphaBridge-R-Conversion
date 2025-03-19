@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-# 
-# Created on Fri Nov 11 15:49:05 2022
-# 
-# @author: Daals
-
+# ==============================
+# Load Required Libraries
+# ==============================
 library(R6)
 library(Biostrings)
 library(jsonlite)

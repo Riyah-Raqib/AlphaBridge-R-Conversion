@@ -1,4 +1,6 @@
-# Load required libraries
+# ==============================
+# Load Required Libraries
+# ==============================
 library(R6)
 library(igraph)
 library(leiden)      # For community detection using Leiden algorithm

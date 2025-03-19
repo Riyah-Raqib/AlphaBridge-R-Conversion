@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-# 
-# Created on Wed Feb 7 16:53:05 2024
-# 
-# @author: Dan_salv
-
-# Load required libraries
+# ==============================
+# Load Required Libraries
+# ==============================
 library(ini)
 library(R6)
 # We use base R functions for math and string manipulation.

@@ -29,7 +29,7 @@ interface_identification <- R6Class("interface_identification",
     chain_dict = NULL,
     polymer_chain_dict = NULL,
     
-    initialize = function(interacting_coevolutionary_domains, 
+    initialise = function(interacting_coevolutionary_domains, 
                           entity_region_dict, 
                           plddt_dict, 
                           rec_sequence_list, 
@@ -546,13 +546,3 @@ get_interface_df <- function(interface_dict) {
   
   return(interface_info_df)
 }
-
-# The Python code was translated line‐by‐line into R while preserving all variable names, classes, methods and comments.
-# The Python class “interface_identification” is implemented using the R6 package, which mimics Python’s class and method structure.
-# Python’s 0‐based indexing is adjusted to R’s 1‐based indexing during matrix slicing and coordinate mapping.
-# The scipy.ndimage.connected component labeling and object extraction (find_interfaces) is implemented using EBImage’s bwlabel function; bounding boxes are computed manually to mimic Python’s slice objects.
-# The unique_combinations functionality from itertools and collections.Counter is replaced with R’s combn function.
-# Graph operations originally performed with networkx are replaced by analogous operations using the igraph package.
-# All functions and helper utilities (such as mergeIntervals, fix_intervals, map_residue_range, etc.) have been translated line‐by‐line with full implementations.
-# Every dependency and import (including sourcing external modules) is included so that the code is ready to run.
-# Some minor deviations may exist due to language differences (e.g. explicit handling of indices), but the functionality is preserved exactly.

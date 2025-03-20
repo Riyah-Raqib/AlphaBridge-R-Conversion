@@ -42,7 +42,7 @@ CONSERVATION_SCORE <- R6Class("CONSERVATION_SCORE",
     gap_cutoff = NULL,
     bg_distribution = NULL,
     
-    initialize = function(msa,""
+    initialise = function(msa,""
                           s_matrix_file = matrix_filepath,
                           scoring_function = "js_divergence", 
                           window_size = 3,
@@ -374,16 +374,3 @@ js_divergence <- function(col, sim_matix, bg_distr, seq_weights, gap_penalty=1){
         return(d)
     }
 }
-
-# The Python code’s UTF-8 encoding and file header have been preserved as R comments at the beginning.
-# Instead of Python’s os and configparser modules, the R translation uses the "ini" package to read the configuration file. The module directory is approximated using the current working directory via getwd(), as R does not have a direct equivalent of file.
-# The numpy library has no direct counterpart in R; native R functions and data types (e.g., diag for identity matrices) are used instead.
-# The dictionary aa_to_index is implemented as an R list mapping each amino acid (as a string) to its 1-indexed position. Although Python uses 0-indexing, R is 1-indexed. This change is necessary for correct indexing in R.
-# The class CONSERVATION_SCORE is implemented using the R6 package to mimic Python classes and methods. All methods and properties are preserved.
-# The msa parameter is assumed to be a list with at least "descriptions" and "sequences" elements, paralleling the Python object attributes.
-# All helper functions (modify_alingment, read_scoring_matrix, calculate_sequence_weights, get_column, gap_percentage, weighted_freq_count_pseudocount, weighted_gap_penalty, window_score, relative_entropy, and js_divergence) were translated line‐by‐line, preserving their logic.
-# The string manipulation functions use R’s gsub and substr to replicate Python’s str.replace and indexing.
-# Error handling using try/except in Python is replicated with tryCatch in R.
-# In the window_score function, the update of the score inside the inner loop is implemented exactly as in the Python code, even though it may lead to multiple reassignments. This preserves the original behavior.
-# All mathematical operations (e.g., logarithm calculations) use R’s log function. For base 2 logarithms in js_divergence, the base parameter is specified.
-# The formatting and comments from the original Python code have been preserved to the fullest extent possible in R.

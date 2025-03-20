@@ -9,7 +9,7 @@ library(grid)
 library(gridExtra)
 library(RColorBrewer)
 
-# For image plotting with colorbar (fields alternative)
+# For image plotting with colourbar (fields alternative)
 library(fields)
 
 # -*- coding: utf-8 -*-
@@ -30,7 +30,7 @@ domain_clustering <- R6Class("domain_clustering",
     bool_mask_clusters = NULL,
     
     # __init__ method
-    initialize = function(matrix_dict, list_fasta_files, plotting = TRUE, bool_mask_clusters = TRUE, outdir = "" , alphafold_version = "AF2"){
+    initialise <- function(matrix_dict, list_fasta_files, plotting = TRUE, bool_mask_clusters = TRUE, outdir = "" , alphafold_version = "AF2"){
       self$matrix_dict <- matrix_dict
       self$list_fasta_files <- list_fasta_files
       self$plotting <- plotting
@@ -248,7 +248,7 @@ plot_combination_matrix <- function(coevolutionary_domains, confidence_matrix, c
   # Create a PNG file for saving the plot
   png(filename = file.path(outdir, "Confidence-contact_plot.png"), width = 1500, height = 1500, res = 300)
   
-  # Set up layout: main plot and additional axes for colorbars and heatmap
+  # Set up layout: main plot and additional axes for colourbars and heatmap
   layout_matrix <- matrix(c(2,3,1,1), nrow = 2, byrow = TRUE)
   layout(layout_matrix, widths = c(4,1), heights = c(1,4))
   
@@ -262,7 +262,7 @@ plot_combination_matrix <- function(coevolutionary_domains, confidence_matrix, c
   par(mar = c(5,5,5,5))
   # Plot confidence_matrix first
   image(confidence_matrix, col = brewer.pal(9, "Blues"), axes = FALSE, main = "")
-  # Overlay contact_matrix using different color map depending on alphafold_version
+  # Overlay contact_matrix using different colour map depending on alphafold_version
   if (alphafold_version == "AF2") {
     image(contact_matrix, col = rev(brewer.pal(9, "RdPu")), add = TRUE)
   } else if (alphafold_version == "AF3") {
@@ -278,11 +278,11 @@ plot_combination_matrix <- function(coevolutionary_domains, confidence_matrix, c
     abline(h = acclen/length(confidence_matrix[,1]), col = "black", lwd = 1)
   }
   
-  # Plot colorbars using image.plot from fields
-  # Right side colorbar for confidence_matrix
+  # Plot colourbars using image.plot from fields
+  # Right side colourbar for confidence_matrix
   par(mar = c(5,0,5,2))
   image.plot(legend.only=TRUE, zlim=range(confidence_matrix), col=brewer.pal(9,"Blues"))
-  # Bottom colorbar for contact_matrix
+  # Bottom colourbar for contact_matrix
   par(mar = c(2,5,2,5))
   image.plot(legend.only=TRUE, horizontal=TRUE, zlim=range(contact_matrix), col=if(alphafold_version=="AF2") rev(brewer.pal(9,"RdPu")) else brewer.pal(9,"RdPu"))
   
@@ -325,7 +325,7 @@ plot_separate_matrix <- function(matrix_dict, list_fasta_files, outdir){
       abline(h = i/length(matrix_plot[,1]), col = "black", lwd = 1)
     }
     
-    # Add colorbar using image.plot
+    # Add colourbar using image.plot
     image.plot(legend.only = TRUE, zlim = range(matrix_plot), col = switch(cmap,
                                                                            "Greens_r" = rev(brewer.pal(9, "Greens")),
                                                                            "Blues_r" = rev(brewer.pal(9, "Blues")),
@@ -378,14 +378,3 @@ plot_joined_matrix <- function(matrix_dict, list_fasta_files, outdir){
   }
   dev.off()
 }
-
-# The Python code was translated line‐by‐line into R using the R6 package to implement the class “domain_clustering” with its methods. All class attributes, methods, and parameters have been preserved exactly as in the original code.
-# For numerical operations, R’s native vectorized operations (using operators such as “^” and “1/”) have been used to mimic numpy’s behavior.
-# The igraph functionality is directly mapped using the R “igraph” package. Note that vertex indexing in Python (0-indexed) versus R (1-indexed) was handled by careful use of indices; it is assumed that the input matrices come from R and are 1-indexed.
-# The Leiden community detection was implemented using the “leiden” package’s function leiden_find_partition. This is the closest R equivalent to Python’s g.community_leiden.
-# Plotting functionality (heatmaps, overlays, colorbars, custom axes ticks) was re-implemented using a combination of base R plotting functions and the “fields” package’s image.plot to simulate matplotlib and seaborn behavior. Due to inherent differences between R and Python plotting libraries, the output may not be pixel‐identical but preserves the overall functionality.
-# All comments from the original Python code have been preserved and translated as R comments.
-# All dependencies have been explicitly imported at the top of the code.
-# All functionality including error handling (implicit in R functions) and complete implementations are provided with no placeholders.
-# Some aspects of layout (such as subplot adjustments, minor ticks, and axes divisions) have been approximated in R since R’s plotting system does not support an exact one‐to‐one mapping with matplotlib.
-# The code is complete and working provided that all required packages ("R6", "igraph", "leiden", "ggplot2", "grid", "gridExtra", "RColorBrewer", and "fields") are installed.

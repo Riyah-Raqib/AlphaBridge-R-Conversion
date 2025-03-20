@@ -10,7 +10,7 @@ protein_seq_alingment <- R6Class("protein_seq_alingment",
     query_seq = NULL,
     ref_seq = NULL,
     
-    initialize = function(query_seq, ref_seq) {
+    initialise = function(query_seq, ref_seq) {
       self$query_seq <- query_seq
       self$ref_seq <- ref_seq
     },
@@ -41,7 +41,7 @@ compare_protein_seq <- R6Class("compare_protein_seq",
     structure_list = NULL,
     fasta_list = NULL,
     
-    initialize = function(structure_list, fasta_list) {
+    initialise = function(structure_list, fasta_list) {
       self$structure_list <- structure_list
       self$fasta_list <- fasta_list
     },
@@ -68,7 +68,7 @@ compare_protein_seq <- R6Class("compare_protein_seq",
         fasta_chain <- fasta[[1]]
         fasta_seq <- fasta[[2]]
         
-        # If not already in struct_dict, initialize as empty vector
+        # If not already in struct_dict, initialise as empty vector
         if(is.null(struct_dict[[as.character(struct_seq)]])) {
           struct_dict[[as.character(struct_seq)]] <- c()
         }
@@ -101,7 +101,7 @@ msa_folder <- R6Class("msa_folder",
     feature_folder = NULL,
     fasta_list = NULL,
     
-    initialize = function(feature_folder, fasta_list) {
+    initialise = function(feature_folder, fasta_list) {
       self$feature_folder <- feature_folder
       self$fasta_list <- fasta_list
     },
@@ -156,27 +156,3 @@ msa_folder <- R6Class("msa_folder",
     }
   )
 )
-
-# Language-specific features and dependencies:
-        # The Python code uses classes. In R, R6 classes are used to replicate class behavior.
-        # The Python Bio module (Bio.Align, Bio.Align.substitution_matrices) is mapped to the Biostrings package in R for sequence alignment using the pairwiseAlignment function.
-        # The BLOSUM62 substitution matrix is accessed via Biostrings::BLOSUM62.
-        # The JSON functionality in Python (json.load) is provided by the jsonlite package in R (fromJSON).
-# Type system differences:
-        # Python’s dynamic typing is emulated with R’s flexible list structures.
-        # The Python defaultdict is replaced by using lists and checking with is.null before initializing a new vector.
-# Standard library equivalents:
-        # os.path.join is replaced by file.path.
-        # os.path.exists is replaced by file.exists.
-        # The “with open(..., encoding)” idiom is replaced by readLines and concatenating the lines for JSON parsing.
-# Error handling:
-        # The original Python code does not implement explicit error handling, so no additional error handling was added in the R translation.
-# Implementation decisions:
-        # The swap of query_seq and ref_seq inside the get_alignment method is preserved exactly as per the original code.
-        # For sequence alignment, default gap penalties (gapOpening = 11, gapExtension = 1) are used to mimic BLASTP as closely as possible.
-        # Iterations and dictionary manipulations in Python are translated into for-loops and list manipulations in R.
-        # All comments from the original Python code are preserved as comments in R.
-# Potential issues and limitations:
-        # The translation assumes that input sequences are provided as character strings.
-        # The structure of lists (structure_list, fasta_list) in R is assumed to be similar to that in Python (i.e., lists of two-element lists/vectors).
-        # The alignment parameters may not exactly replicate BLASTP’s behavior; adjustments might be needed for exact equivalence.

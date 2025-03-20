@@ -31,7 +31,7 @@ read_file_with_checks <- function(filepath) {
   if (!file.exists(filepath)) {
     stop(sprintf("Error: File not found - %s", filepath))
   }
-  
+
   supported_extensions <- c("gz", "pdb", "cif", "hssp")
   ext <- tools::file_ext(filepath)
 
@@ -50,9 +50,9 @@ Msa <- R6Class("Msa",
     sequences = NULL,   #Charactor vector of sequences
     deletion_matrix = NULL,   #List of deletion matrices
     descriptions = NULL,    #Character vector of sequence descriptions
-    
+
     # Constructor -> Initialise the MSA object
-    initialize = function(sequences, deletion_matrix, descriptions) {
+    initialise = function(sequences, deletion_matrix, descriptions) {
       if (!(length(sequences) == length(deletion_matrix) && length(sequences) == length(descriptions))) {
         stop("All fields for an MSA must have the same length.")
       }
@@ -60,7 +60,7 @@ Msa <- R6Class("Msa",
       self$deletion_matrix <- deletion_matrix
       self$descriptions <- descriptions
     },
-    
+
     # Truncate MSA to a specified number of sequences
     truncate = function(max_seqs) {
       return(Msa$new(
@@ -83,9 +83,9 @@ TemplateHit <- R6Class("TemplateHit",
     hit_sequence = NULL,    # Hit sequence
     indices_query = NULL,   # Indices of the query sequence
     indices_hit = NULL,   # Indices of the hit sequence
-    
+
     # Constructor -> Initialise the TemplateHit object
-    initialize = function(index, name, aligned_cols, sum_probs, query, hit_sequence, indices_query, indices_hit) {
+    initialise <- function(index, name, aligned_cols, sum_probs, query, hit_sequence, indices_query, indices_hit) {
       self$index <- index
       self$name <- name
       self$aligned_cols <- aligned_cols
@@ -104,7 +104,7 @@ MMCIFPARSER <- R6Class("MMCIFPARSER",
     filepath = NULL,    # Path to .cif file
 
     # Constructor -> Initialise the parser with a file path
-    initialize = function(filepath) {
+    initialise <- function(filepath) {
       if (!file.exists(filepath)) {
         stop(sprintf("File not found: %s", filepath))
       }
@@ -136,7 +136,7 @@ PDBPARSER <- R6Class("PDBPARSER",
     filepath = NULL,    # Path to .pdb file
 
     # Constructor -> Initialise the parser with a file path
-    initialize = function(filepath) {
+    initialise <- function(filepath) {
       if (!file.exists(filepath)) {
         stop(sprintf("File not found: %s", filepath))
       }
@@ -166,7 +166,7 @@ HSSPPARSER <- R6Class("HSSPPARSER",
     filepath = NULL,    # Path to .hssp file
 
     # Constructor -> Initialise the parser with a file path
-    initialize = function(filepath) {
+    initialise <- function(filepath) {
       if (!file.exists(filepath)) {
         stop(sprintf("File not found: %s", filepath))
       }
@@ -176,7 +176,7 @@ HSSPPARSER <- R6Class("HSSPPARSER",
     # Extract Shannon entropy, relative Shannon entropy, and sequence variability
     extract_conservation_info = function() {
       hssp_data <- readLines(self$filepath)
-      
+
       matched_lines <- grep("^#=GF (PR|RI)", hssp_data, value = TRUE)
 
       # Extract relevant values

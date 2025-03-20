@@ -22,7 +22,7 @@ np <- import("numpy", convert = TRUE)
 PDBPARSER <- R6Class("PDBPARSER",
     public = list(
         structure_path = NULL,
-        initialize = function(structure_path) {
+        initialise = function(structure_path) {
             self$structure_path <- structure_path
         },
         get_ca_distances = function() {
@@ -38,7 +38,7 @@ PDBPARSER <- R6Class("PDBPARSER",
 MMCIFPARSER <- R6Class("MMCIFPARSER",
     public = list(
         structure_path = NULL,
-        initialize = function(structure_path) {
+        initialise = function(structure_path) {
             self$structure_path <- structure_path
         },
         get_sequence_list = function() {
@@ -99,7 +99,7 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
         job_id = NULL,
         alphafold_version = NULL,
         outdir = NULL,
-        initialize = function(job_id, outdir = "", alphafold_version = "AF2) {
+        initialise = function(job_id, outdir = "", alphafold_version = "AF2") {
             self$job_id <- job_id
             self$alphafold_version <- alphafold_version
             self$outdir <- outdir
@@ -418,7 +418,7 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
             matrix_dict$masked_contact_matrix <- NULL
             if (dir.exists(self$outdir)) {
                 feature_object_path <- file.path(self$outdir, "matrix_info.json")
-                json_text <- toJSON(matrix_dict, pretty = TRUE, auto_unbox = TRUE, 
+                json_text <- toJSON(matrix_dict, pretty = TRUE, auto_unbox = TRUE,
                                       force = TRUE, null = "null")
                 write(json_text, file = feature_object_path)
             }
@@ -442,37 +442,3 @@ errno <- function() {
 strerror <- function(err_no, filepath = "") {
     return(sprintf("No such file or directory: %s", filepath))
 }
-
-# Dependency Imports and Libraries:
-# In this R translation, we load essential libraries: R6 (for class definitions), jsonlite (for JSON parsing), ini (for configuration parsing), reticulate (to load Python’s numpy for reading pickle files), Biostrings (for FASTA sequence handling), along with data.table, stringr, and tools for supporting functions.
-# The warnings are suppressed using options(warn = -1) to mimic Python’s warnings.filterwarnings("ignore").
-# External Module Stubs:
-    # The Python code imports external modules (PDBPARSER, MMCIFPARSER, and compare_protein_seq). Since their full implementations are not provided, I created R6 stub classes for PDBPARSER and MMCIFPARSER with the required methods that return dummy data.
-    # Similarly, compare_protein_seq is implemented as a simple function that returns an identity mapping.
-    # These stubs ensure that every call in the original code is preserved and the translation is complete. However, in a production environment, these stubs must be replaced with proper implementations.
-# Configuration Parsing:
-    # The configuration file is read using the ini package. The module directory is determined using commandArgs and normalizePath. This may need adjustment depending on the deployment environment.
-# Class and Method Translations:
-    # All Python class methods are translated into methods of an R6 class named FEATURE_MATRIX while preserving method names and functionality.
-    # Python’s string formatting (f-strings) is replaced with sprintf.
-    # File path operations use file.path and related R functions.
-    # Error handling in Python via exceptions is replaced with the R stop() function.
-# Sequence Handling:
-    # For extracting sequences, Biostrings is used to read FASTA files when alphafold_version is "AF2".
-    # When alphafold_version is "AF3", the code uses list.files to perform glob-style matching, and the sequence records are manually created as lists to mimic Bio.SeqRecord. A counter based on LETTERS is used to simulate chain identification.
-# Matrix and Array Operations:
-    #Numpy operations are translated to R’s matrix operations. For pairwise distances, the as.matrix(dist(...)) function is used.
-    #The symmetric pae matrix and plddt matrix operations are implemented using nested for loops to closely mimic the Python code.
-    #Masked arrays are simulated by setting masked elements to NA.
-#JSON and Pickle Handling:
-    #JSON reading and writing are done using jsonlite.
-    #For AF2, Python’s pickle file is loaded using reticulate to call numpy’s load function. The py_to_r function converts the loaded data to an R list.
-    #The custom NumpyEncoder class in Python is replaced with the NumpyEncoder function for converting matrices/arrays during JSON conversion, although jsonlite handles most conversions automatically.
-    #Preservation of Code Structure:
-    #Every line and comment from the original Python code has been translated and preserved as closely as possible.
-    #All variables, methods, and class names are maintained, ensuring an exact translation.
-#Potential Issues and Limitations:
-    #The stub implementations for external modules (PDBPARSER, MMCIFPARSER, compare_protein_seq) provide dummy data. These will need proper implementations for real data processing.
-    #The method of obtaining the module directory in R may require adjustments depending on how the script is executed.
-    #The handling of pickle files via reticulate assumes that a working Python environment is available.
-    #The simulation of masked arrays (using NA) is simplistic compared to NumPy’s masked arrays.

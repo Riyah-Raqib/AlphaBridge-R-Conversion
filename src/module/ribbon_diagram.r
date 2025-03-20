@@ -10,7 +10,36 @@ library(grid)
 # Get the module directory (approximation of __file__ in R)
 module_dir <- dirname(normalizePath(sys.frame(1)$ofile %||% "module_placeholder.R"))
 
-# Define the RIBBON_DIAGRAM class using R6 --------------------------------------------------
+# ==============================
+# Helper Functions
+# ==============================
+# Assign colours to interfaces
+get_interface2colour <- function(interfaces_list) {
+  palette <- colorRampPalette(brewer.pal(12, "Paired"))(length(interfaces_list))
+  return(setNames(colour_palette, interfaces_list))
+}
+
+# Assign colours to pLDDT values
+get_colour_plddt <- function(plddt_value) {
+  colour_breaks <- c(0, 50, 70, 90, 100)
+  colours <- c("#ff7d45", "#ffdb13", "#65cbf3", "#0053d6")
+  return(colours[cut(plddt_value, breaks = colour_breaks, labels = FALSE, include.lowest = TRUE)])
+}
+
+# Assign colours to conservation values
+get_conservation_colour <- function(value) {
+  colour_palette <- rev(brewer.pal(11, "RdBu"))
+  return(colour_palette[round(value * (length(colour_palette) - 1)) + 1])
+}
+
+# Utility infix operator for default value
+`%||%` <- function(a, b) {
+  if (!is.null(a)) a else b
+}
+
+# ==============================
+# Ribbon Diagram Class
+# ==============================
 RIBBON_DIAGRAM <- R6Class("RIBBON_DIAGRAM",
   public = list(
     list_sequence_info = NULL,
@@ -20,8 +49,8 @@ RIBBON_DIAGRAM <- R6Class("RIBBON_DIAGRAM",
     conservation_dict = NULL,
     outdir = NULL,
 
-    # __init__ method -----------------------------------------------------------
-    initialize = function(list_sequence_info, interface_dict, protein_interface_dict, 
+    # Initialise ribbon diagram class with sequence and interface data
+    initialise <- function(list_sequence_info, interface_dict, protein_interface_dict,
                           plddt_dict = list(), conservation_dict = list(), outdir = "") {
       self$list_sequence_info <- list_sequence_info
       self$interface_dict <- interface_dict
@@ -31,187 +60,35 @@ RIBBON_DIAGRAM <- R6Class("RIBBON_DIAGRAM",
       self$outdir <- outdir
     },
 
-    # create_ribbon_plot method -> THIS WAS FROM THE INITIAL CODE CONVERSION TOOL
-#    create_ribbon_plot = function() {
-#      # Unpack the sequence info
-#      list_fasta_name    <- self$list_sequence_info[[1]]
-#      list_fasta_acclen  <- self$list_sequence_info[[2]]
-#      list_fasta_centerticks <- self$list_sequence_info[[3]]
-#      list_fasta_len     <- self$list_sequence_info[[4]]
-#
-#      # Get the list of interfaces
-#      interfaces_list <- names(self$interface_dict)
-#
-#      protein_interface_dict <- self$protein_interface_dict
-#      interface_dict <- self$interface_dict
-#      " COLOUR SCHEMA NEEDED"
-#
-#      # Setup plddt colormap using Spectral (approximated using RColorBrewer "Spectral")
-#      cmap_plddt <- brewer.pal(11, "Spectral")
-#      # Create a function to map values from 0 to 100 into the palette
-#      get_plddt_color_func <- function(value) {
-#        # This function is not used because we override with get_colour_plddt below
-#        index <- round((value/100) * (length(cmap_plddt)-1)) + 1
-#        return(cmap_plddt[index])
-#      }
-#
-#      # Setup conservation colormap using RdBu reversed (RdBu_r equivalent)
-#      cmap_conservation <- rev(brewer.pal(11, "RdBu"))
-#      get_conservation_color <- function(value) {
-#        # value expected between 0 and 1
-#        index <- round(value * (length(cmap_conservation)-1)) + 1
-#        return(cmap_conservation[index])
-#      }
-#
-#      interface2color <- get_interface2color(interfaces_list)
-#
-#      "INITIALIZE CIRCOS PLOT"
-#
-#      # Prepare sectors as a named numeric vector (fasta_name: fasta_len)
-#      sectors <- setNames(as.numeric(list_fasta_len), list_fasta_name)
-#
-#      # Set circular plotting parameters; gap.degree is approximated with space =5
-#      circos.clear()
-#      circos.par(gap.degree = 5)
-#
-#      # Initialize sectors: each sector gets its own xlim from 0 to its length
-#      factor_levels <- names(sectors)
-#      xlim_matrix <- matrix(c(rep(0, length(sectors)), sectors), ncol = 2)
-#      rownames(xlim_matrix) <- factor_levels
-#      circos.initialize(factors = factor_levels, xlim = xlim_matrix)
-#
-#      # For each sector, add tracks and annotations
-#      for(sector_name in factor_levels) {
-#        # Define track positions as percentages of the radial space (we mimic the absolute positions)
-#        tracks_position_list <- list(c(75,85), c(88,93), c(95,100))
-#
-#        # Get plddt list for this sector
-#        plddt_list <- self$plddt_dict[[sector_name]]
-#
-#        # Check for conservation data
-#        if(length(self$conservation_dict) == 0) {
-#          conservation_list <- c()
-#          # Remove the last track if no conservation data
-#          tracks_position_list <- tracks_position_list[1:2]
-#        } else {
-#          conservation_list <- self$conservation_dict[[sector_name]]
-#          # Add a colorbar for conservation.
-#          # In R, we simulate a colorbar later using legend; here we note the parameters.
-#          # (In a complete implementation, one might use grid or lattice to draw a separate colorbar.)
-#        }
-#
-#        # Add tracks for each track_position defined in tracks_position_list
-#        # We simulate tracks by adding track layers with fixed height (here, height=0.05)
-#        for(tp in tracks_position_list) {
-#          circos.trackPlotRegion(factors = sector_name, ylim = c(0,1), 
-#                                 track.height = 0.05,
-#                                 panel.fun = function(x, y) {
-#                                   circos.axis(h = "top", labels.cex = 0.6)
-#                                 })
-#        }
-#        # Add text label on the last track (using track index equal to length(tracks_position_list))
-#        circos.text(CELL_META$xcenter, 
-#                    CELL_META$ycenter + 0.1, 
-#                    sector_name, 
-#                    facing = "clockwise", 
-#                    niceFacing = TRUE, 
-#                    adj = c(0, 0.5), 
-#                    col = "black", cex = 0.7)
-#
-#        # For each residue in the sector, draw rectangles for plddt and conservation tracks
-#        # We assume the number of residues equals sector size (from xlim)
-#        sector_size <- sectors[[sector_name]]
-#        for(i in 0:(sector_size - 1)) {
-#          # plddt rectangle in second track (simulate by switching to track index 2)
-#          # Get color for plddt using get_colour_plddt function
-#          plddt_color <- get_colour_plddt(plddt_list[i + 1])
-#          # Draw rectangle in the second track area
-#          circos.rect(xleft = i, ybottom = 0, 
-#                      xright = i + 1, ytop = 1, 
-#                      sector.index = sector_name,
-#                      track.index = 2, 
-#                      col = plddt_color, border = NA)
-#
-#          # If conservation data exists, draw rectangle in third track area
-#          if(length(conservation_list) > 0) {
-#            conservation_color <- get_conservation_color(conservation_list[i + 1])
-#            circos.rect(xleft = i, ybottom = 0, 
-#                        xright = i + 1, ytop = 1, 
-#                        sector.index = sector_name,
-#                        track.index = 3, 
-#                        col = conservation_color, border = NA)
-#          }
-#        }
-#
-#        # Draw interface ranges for this sector if available
-#        if(sector_name %in% names(protein_interface_dict)) {
-#          for(interface_name in interfaces_list) {
-#            if(interface_name %in% names(protein_interface_dict[[sector_name]])) {
-#              interface_range_list <- protein_interface_dict[[sector_name]][[interface_name]]$interface_range
-#              for(interface_range in interface_range_list) {
-#                # Convert residue numbers to degrees; we use circlize's conversion functions
-#                # Here we approximate: get start and end in x coordinates
-#                start_res <- interface_range[1] - 1
-#                end_res <- interface_range[length(interface_range)] - 1
-#                # Draw rectangle on the first track (simulate using track.index=1)
-#                circos.rect(xleft = start_res, ybottom = 0, 
-#                            xright = end_res, ytop = 1, 
-#                            sector.index = sector_name,
-#                            track.index = 1,
-#                            col = interface2color[[interface_name]],
-#                            border = "black", lwd = 0.5)
-#              }
-#            }
-#          }
-#        }
-#      }
-#
-#      # Draw links between interfaces across sectors
-#      for(interface in names(interface_dict)) {
-#        # Access interface_dict[interface]
-#        prot_1 <- interface_dict[[interface]]$prot_1$accesion_id
-#        prot_2 <- interface_dict[[interface]]$prot_2$accesion_id
-#        color <- interface2color[[interface]]
-#        links <- interface_dict[[interface]]$links
-#        for(link in links) {
-#          link_prot_1 <- link[[1]]
-#          link_prot_2 <- link[[2]]
-#          # Use circos.link; subtract 1 from start and end positions as in Python
-#          circos.link(prot_1, c(link_prot_1[1] - 1, link_prot_1[2] - 1),
-#                      prot_2, c(link_prot_2[1] - 1, link_prot_2[2] - 1),
-#                      col = adjustcolor(color, alpha.f = 0.25), border = NA)
-#        }
-#      }
-#      
-#      # Return the circos plot (in circlize, the plot is drawn on the current device)
-#      return(invisible(NULL))
-#    },
-
-# CREATE RIBBON PLOT METHOD ACCORDING TO A DIFFERENT TOOL -> COMPARE THE TWO FOR FUNCTION AND EFFICIENCY
+# Create ribbon diagram
 create_ribbon_plot = function() {
-  # Unpack sequence info
+  # Extract sequence information
   list_fasta_name    <- self$list_sequence_info[[1]]
   list_fasta_acclen  <- self$list_sequence_info[[2]]
   list_fasta_len     <- self$list_sequence_info[[4]]
 
-  # Precompute color maps (avoid redundant computations inside loops)
+  # Precompute interface colours
   cmap_plddt <- brewer.pal(11, "Spectral")
   cmap_conservation <- rev(brewer.pal(11, "RdBu"))
 
-  get_plddt_color_func <- function(value) cmap_plddt[round((value / 100) * (length(cmap_plddt) - 1)) + 1]
-  get_conservation_color <- function(value) cmap_conservation[round(value * (length(cmap_conservation) - 1)) + 1]
+  get_plddt_colour_func <- function(value) cmap_plddt[round((value / 100) * (length(cmap_plddt) - 1)) + 1]
+  get_conservation_colour <- function(value) cmap_conservation[round(value * (length(cmap_conservation) - 1)) + 1]
 
-  interface2color <- get_interface2color(names(self$interface_dict))
+  interface2colour <- get_interface2colour(names(self$interface_dict))
 
-  # Initialize Circos Plot
+  # Initialise Circos plot
   sectors <- setNames(as.numeric(list_fasta_len), list_fasta_name)
   circos.clear()
   circos.par(gap.degree = 5)
+  circos.initialise(factors = names(sectors), xlim = matrix(c(rep(0, length(sectors)), sectors), ncol = 2))
+
+  # Define sector sizes
+  sectors <- setNames(as.numeric(list_fasta_len), list_fasta_name)
   circos.initialize(factors = names(sectors), xlim = matrix(c(rep(0, length(sectors)), sectors), ncol = 2))
 
   # Process each sector
   lapply(names(sectors), function(sector_name) {
-    sector_size <- sectors[[sector_name]]
+  sector_size <- sectors[[sector_name]]
 
     # Fetch sequence-based values
     plddt_list <- self$plddt_dict[[sector_name]]
@@ -222,16 +99,16 @@ create_ribbon_plot = function() {
 
     # Add tracks
     lapply(tracks_position_list, function(tp) {
-      circos.trackPlotRegion(factors = sector_name, ylim = c(0,1), track.height = 0.05, 
+      circos.trackPlotRegion(factors = sector_name, ylim = c(0,1), track.height = 0.05,
                              panel.fun = function(x, y) circos.axis(h = "top", labels.cex = 0.6))
     })
 
-    # Add pLDDT and conservation color bars (vectorized)
+    # Add pLDDT and conservation colour bars (vectorized)
     if (!is.null(plddt_list)) {
       circos.rect(xleft = 0:(sector_size - 1),
         ybottom = 0,
         xright = 1:sector_size,
-        ytop = 1, 
+        ytop = 1,
         sector.index = sector_name,
         track.index = 2,
         col = sapply(plddt_list, get_colour_plddt),
@@ -242,10 +119,10 @@ create_ribbon_plot = function() {
       circos.rect(xleft = 0:(sector_size - 1),
         ybottom = 0,
         xright = 1:sector_size,
-        ytop = 1, 
+        ytop = 1,
         sector.index = sector_name,
         track.index = 3,
-        col = sapply(conservation_list, get_conservation_color),
+        col = sapply(conservation_list, get_conservation_colour),
         border = NA)
     }
 
@@ -253,9 +130,9 @@ create_ribbon_plot = function() {
     if (sector_name %in% names(self$protein_interface_dict)) {
       lapply(names(self$protein_interface_dict[[sector_name]]), function(interface_name) {
         interface_ranges <- self$protein_interface_dict[[sector_name]][[interface_name]]$interface_range
-        col <- interface2color[[interface_name]]
+        col <- interface2colour[[interface_name]]
         lapply(interface_ranges, function(range) {
-          circos.rect(xleft = range[1] - 1, ybottom = 0, xright = range[length(range)] - 1, ytop = 1, 
+          circos.rect(xleft = range[1] - 1, ybottom = 0, xright = range[length(range)] - 1, ytop = 1,
                       sector.index = sector_name, track.index = 1, col = col, border = "black", lwd = 0.5)
         })
       })
@@ -266,7 +143,7 @@ create_ribbon_plot = function() {
   invisible(lapply(names(self$interface_dict), function(interface) {
     prot_1 <- self$interface_dict[[interface]]$prot_1$accesion_id
     prot_2 <- self$interface_dict[[interface]]$prot_2$accesion_id
-    col <- adjustcolor(interface2color[[interface]], alpha.f = 0.25)
+    col <- adjustcolour(interface2colour[[interface]], alpha.f = 0.25)
     links <- self$interface_dict[[interface]]$links
 
     lapply(links, function(link) {
@@ -275,71 +152,25 @@ create_ribbon_plot = function() {
   }))
 }
 
-    # Plot_ribbon_diagram method
-    plot_ribbon_diagram = function() {
-      circos_obj <- self$create_ribbon_plot()
-      outdir <- self$outdir
-      filename <- paste0(outdir, "/ribbon_plot.png")
+# Save plot as PNG file
+plot_ribbon_diagram = function() {
+  circos_obj <- self$create_ribbon_plot()
+  outdir <- self$outdir
+  filename <- paste0(outdir, "/ribbon_plot.png")
 
-      # Open a PNG device to save the plot
-      png(filename, width = 1000, height = 1000, res = 300)
-      # Re-draw the circos plot
-      self$create_ribbon_plot()
-      # Maybe a TIFF could be produced instead for lossless images?
+  # Open a PNG device to save the plot
+  png(filename, width = 1000, height = 1000, res = 300)
+  # Re-draw the circos plot
+  self$create_ribbon_plot()
+  # Maybe a TIFF could be produced instead for lossless images?
 
-      # Create legend using base graphics; position approximated to the right of the plot
-      legend("topright", legend = c("Very high", "High", "Low", "Very Low"),
-              fill = c("#0053d6", "#65cbf3", "#ffdb13", "#ff7d45"),
-              title = "Model confidence",
-              cex = 0.8,
-              bty = "n")
-      dev.off()
-    }
-  )
+  # Create legend using base graphics; position approximated to the right of the plot
+  legend("topright", legend = c("Very high", "High", "Low", "Very Low"),
+          fill = c("#0053d6", "#65cbf3", "#ffdb13", "#ff7d45"),
+          title = "Model confidence",
+          cex = 0.8,
+          bty = "n")
+  dev.off()
+}
 )
-
-# get_interface2color function ------------------------------------------------------
-get_interface2color <- function(interfaces_list) {
-  # Get color palette similar to matplotlib "tab20"
-  # Generate 20 colors using rainbow as an approximation
-  cmap <- rainbow(20)
-  # Create color_list: ensure only RGB channels are used (already hex in R)
-  color_list <- cmap
-  # Reorder colors: first take odd indices then even indices
-  reord_color_list <- c(color_list[seq(1, length(color_list), by = 2)],
-                        color_list[seq(2, length(color_list), by = 2)])
-  # Create a named list mapping interface names to colors
-  interface2color <- setNames(reord_color_list[seq_along(interfaces_list)], interfaces_list)
-  return(interface2color)
-
-  # Possible code to use instead for this function:
-  # get_interface2color <- function(interfaces_list) {
-  # colors <- colorRampPalette(brewer.pal(12, "Paired"))(length(interfaces_list))
-  # return(setNames(colors, interfaces_list))
-  # }
-}
-
-# get_colour_plddt function ---------------------------------------------------------
-get_colour_plddt <- function(plddt_value) {
-  if (plddt_value < 50) {
-    return("#ff7d45")
-  } else if (plddt_value < 70) {
-    return("#ffdb13")
-  } else if (plddt_value < 90) {
-    return("#65cbf3")
-  } else {
-    return("#0053d6")
-  }
-
-  # Possible code to use instead for this function:
-  # get_colour_plddt <- function(plddt_value) {
-  # color_breaks <- c(0, 50, 70, 90, 100)
-  # colors <- c("#ff7d45", "#ffdb13", "#65cbf3", "#0053d6")
-  # return(colors[cut(plddt_value, breaks = color_breaks, labels = FALSE, include.lowest = TRUE)])
-  # }
-}
-
-# Utility infix operator for default value -------------------------------------------
-`%||%` <- function(a, b) {
-  if (!is.null(a)) a else b
-}
+)

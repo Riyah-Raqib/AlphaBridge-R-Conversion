@@ -500,7 +500,7 @@ get_interface_df_per_token <- function(rec_sequence_list, list_sequence_info, ch
     
     for (res in 0:(prot_len - 1)) {
       
-      if (polymer_chain_dict[[ chain_dict[[fasta_name]] ]]$entity_type == 'polypeptide(L)') {
+      if (polymer_chain_dict[[ chain_dict[[fasta_name]] ]]$entity_type == "polypeptide(L)") {
         comp_id <- upper_protein_letters_1to3[substr(fasta_sequence_dict[[fasta_name]], res+1, res+1)]
       } else {
         comp_id <- substr(fasta_sequence_dict[[fasta_name]], res+1, res+1)
@@ -518,7 +518,7 @@ get_interface_df_per_token <- function(rec_sequence_list, list_sequence_info, ch
   }
   
   interface_df_per_token <- as.data.frame(do.call(rbind, res_link_data), stringsAsFactors = FALSE)
-  colnames(interface_df_per_token) <- c('prot_name','asym_id','res_index','comp_id','interface', 'link_id' , 'plddt', 'link_probability')
+  colnames(interface_df_per_token) <- c("prot_name", "asym_id", "res_index", "comp_id", "interface", "link_id" , "plddt", "link_probability")
   
   return(interface_df_per_token)
 }
@@ -542,7 +542,7 @@ get_interface_df <- function(interface_dict) {
     }
   }
   interface_info_df <- as.data.frame(do.call(rbind, interaction_link_data), stringsAsFactors = FALSE)
-  colnames(interface_info_df) <- c('interface','prot_1','start_1','end_1','prot_2','start_2','end_2')
+  colnames(interface_info_df) <- c("interface","prot_1","start_1","end_1","prot_2","start_2","end_2")
   
   return(interface_info_df)
 }

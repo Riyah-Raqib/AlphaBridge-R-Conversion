@@ -99,16 +99,16 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
         job_id = NULL,
         alphafold_version = NULL,
         outdir = NULL,
-        initialize = function(job_id, outdir = '', alphafold_version = 'AF2') {
+        initialize = function(job_id, outdir = "", alphafold_version = "AF2) {
             self$job_id <- job_id
             self$alphafold_version <- alphafold_version
             self$outdir <- outdir
         },
         get_sequence_info_path = function() {
             job_id <- self$job_id
-            if (self$alphafold_version == 'AF2') {
+            if (self$alphafold_version == "AF2") {
                 filepath <- sprintf("/DATA/zata/projects/interactions/data/request/fasta/%s.fasta", job_id)
-            } else if (self$alphafold_version == 'AF3') {
+            } else if (self$alphafold_version == "AF3") {
                 filepath <- self$get_feature_folder_path()
             }
             if (file.exists(filepath)) {
@@ -119,9 +119,9 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
         },
         get_feature_folder_path = function() {
             job_id <- self$job_id
-            if (self$alphafold_version == 'AF2') {
+            if (self$alphafold_version == "AF2") {
                 filepath <- sprintf("/DATA/zata/projects/interactions/data/results/%s", job_id)
-            } else if (self$alphafold_version == 'AF3') {
+            } else if (self$alphafold_version == "AF3") {
                 filepath <- file.path(AF3_DIR, job_id)
             }
             if (file.exists(filepath)) {
@@ -131,7 +131,7 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
             }
         },
         extract_sequences = function(sequence_info_path) {
-            if (self$alphafold_version == 'AF2') {
+            if (self$alphafold_version == "AF2") {
                 # Using Biostrings to read fasta file
                 recs <- readAAStringSet(sequence_info_path)
                 rec_list <- list()
@@ -142,7 +142,7 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
                     )
                     rec_list[[length(rec_list) + 1]] <- rec
                 }
-            } else if (self$alphafold_version == 'AF3') {
+            } else if (self$alphafold_version == "AF3") {
                 folder_path <- sequence_info_path
                 job_request_pattern <- "job_request.*\\.json"
                 files <- list.files(folder_path, pattern = job_request_pattern, full.names = TRUE)
@@ -161,7 +161,7 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
                     key <- names(macromolecule)[1]
                     count <- macromolecule[[key]]$count
                     for (item in 1:count) {
-                        if (key %in% c('proteinChain', 'dnaSequence', 'rnaSequence')) {
+                        if (key %in% c("proteinChain", "dnaSequence", "rnaSequence")) {
                             seq_obj <- macromolecule[[key]]$sequence
                             chain_id <- paste0(seq_types_symbols[[key]], chains[chain_counter])
                             chain_counter <- chain_counter + 1
@@ -221,9 +221,9 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
             list_fasta_centerticks <- c()
             num_acc <- 0
             sequence_info_path <- self$get_sequence_info_path()
-            if (self$alphafold_version == 'AF2') {
+            if (self$alphafold_version == "AF2") {
                 fasta_sequences <- self$extract_sequences(sequence_info_path)
-            } else if (self$alphafold_version == 'AF3') {
+            } else if (self$alphafold_version == "AF3") {
                 fasta_sequences <- self$reorder_sequences_by_token_list()
             }
             for (i in seq_along(fasta_sequences)) {
@@ -244,16 +244,16 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
             return(list(list_fasta_name, list_fasta_acclen, list_fasta_centerticks, list_fasta_len))
         },
         find_feature_files = function() {
-            if (self$alphafold_version == 'AF2') {
+            if (self$alphafold_version == "AF2") {
                 feature_folder <- self$get_feature_folder_path()
-                ranking_file <- file.path(feature_folder, 'ranking_debug.json')
+                ranking_file <- file.path(feature_folder, "ranking_debug.json")
                 json_text <- readLines(ranking_file, warn = FALSE)
                 ranking <- fromJSON(paste(json_text, collapse = "\n"))
                 first_model <- ranking$order[1]
                 feature_filename <- sprintf("result_%s.pkl", first_model)
                 structure_path <- file.path(feature_folder, "ranked_0.pdb")
                 feature_path <- file.path(feature_folder, feature_filename)
-            } else if (self$alphafold_version == 'AF3') {
+            } else if (self$alphafold_version == "AF3") {
                 folder_path <- self$get_feature_folder_path()
                 json_files <- list.files(folder_path, pattern = "full_data_0\\.json", full.names = TRUE)
                 cif_files <- list.files(folder_path, pattern = "model_0\\.cif", full.names = TRUE)
@@ -269,9 +269,9 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
             files <- self$find_feature_files()
             structure_path <- files[[1]]
             feature_path <- files[[2]]
-            if (self$alphafold_version == 'AF2') {
+            if (self$alphafold_version == "AF2") {
                 ca_distances <- PDBPARSER$new(structure_path)$get_ca_distances()
-            } else if (self$alphafold_version == 'AF3') {
+            } else if (self$alphafold_version == "AF3") {
                 ca_distances <- MMCIFPARSER$new(structure_path)$get_ca_distances()
             }
             distance_matrix <- as.matrix(dist(ca_distances))
@@ -290,7 +290,7 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
             polymer_chain_dict <- MMCIFPARSER$new(structure_path)$get_polypeptide_chain_dict()
             polypeptide_chain_list <- c()
             for (chain in names(polymer_chain_dict)) {
-                if (polymer_chain_dict[[chain]]$entity_type %in% c('polypeptide(L)', 'polydeoxyribonucleotide', 'polyribonucleotide')) {
+                if (polymer_chain_dict[[chain]]$entity_type %in% c("polypeptide(L)", "polydeoxyribonucleotide", "polyribonucleotide")) {
                     polypeptide_chain_list <- c(polypeptide_chain_list, chain)
                 }
             }
@@ -313,7 +313,7 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
                 for (seq_id in names(structure_coordinates[[asym_id]])) {
                     atom_ids <- names(structure_coordinates[[asym_id]][[seq_id]]$atom_id)
                     for (atom_id in atom_ids) {
-                        if (polymer_chain_dict[[asym_id]]$entity_type %in% c('polypeptide(L)', 'polydeoxyribonucleotide', 'polyribonucleotide')) {
+                        if (polymer_chain_dict[[asym_id]]$entity_type %in% c("polypeptide(L)", "polydeoxyribonucleotide", "polyribonucleotide")) {
                             plddt <- as.numeric(structure_coordinates[[asym_id]][[seq_id]]$atom_id[[atom_id]]$plddt)
                             data_list[[length(data_list) + 1]] <- list(asym_id = asym_id, seq_id = seq_id, plddt = plddt)
                         }
@@ -329,7 +329,7 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
             files <- self$find_feature_files()
             structure_path <- files[[1]]
             feature_path <- files[[2]]
-            if (self$alphafold_version == 'AF2') {
+            if (self$alphafold_version == "AF2") {
                 distance_matrix <- self$get_distance_matrix()
                 # Load pickle file using reticulate's numpy load
                 feature_dict <- np$load(feature_path, allow_pickle = TRUE)
@@ -338,7 +338,7 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
                 pae <- feature_dict$predicted_aligned_error
                 plddt <- feature_dict$plddt
                 contact_probability <- list()
-            } else if (self$alphafold_version == 'AF3') {
+            } else if (self$alphafold_version == "AF3") {
                 folder_path <- self$get_feature_folder_path()
                 feature_dict <- read_json_file(feature_path)
                 plddt <- self$extract_plddt_per_residue(structure_path)
@@ -377,10 +377,10 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
             }
             pae_plddt <- symmetric_pae + plddt_matrix / 3
             pae_plddt[pae_plddt > 32] <- 32
-            if (self$alphafold_version == 'AF2') {
+            if (self$alphafold_version == "AF2") {
                 log_distance <- ifelse(distance_matrix != 0, log10(distance_matrix), 0)
                 log_pae <- ifelse(symmetric_pae != 0, log10(symmetric_pae), 0)
-                confidance_matrix <- log_distance + log_pae
+                confidence_matrix <- log_distance + log_pae
                 contact_matrix <- distance_matrix
                 modified_distance_matrix <- distance_matrix
                 modified_distance_matrix[modified_distance_matrix > 40] <- 40
@@ -388,18 +388,18 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
                 masked_contact_matrix <- modified_distance_matrix
                 masked_contact_matrix[mask_upper] <- NA
                 mask_lower <- lower.tri(symmetric_pae, diag = TRUE)
-                masked_confidance_matrix <- pae
-                masked_confidance_matrix[mask_lower] <- NA
-            } else if (self$alphafold_version == 'AF3') {
-                confidance_matrix <- pae_plddt
+                masked_confidence_matrix <- pae
+                masked_confidence_matrix[mask_lower] <- NA
+            } else if (self$alphafold_version == "AF3") {
+                confidence_matrix <- pae_plddt
                 contact_matrix <- contact_probability
                 binary_contact <- contact_probability > 0.5
                 mask_upper <- upper.tri(binary_contact, diag = TRUE)
                 masked_contact_matrix <- binary_contact
                 masked_contact_matrix[mask_upper] <- NA
                 mask_lower <- lower.tri(pae_plddt, diag = TRUE)
-                masked_confidance_matrix <- pae_plddt
-                masked_confidance_matrix[mask_lower] <- NA
+                masked_confidence_matrix <- pae_plddt
+                masked_confidence_matrix[mask_lower] <- NA
             }
             matrix_dict$pae <- pae
             matrix_dict$plddt <- plddt
@@ -407,17 +407,17 @@ FEATURE_MATRIX <- R6Class("FEATURE_MATRIX",
             matrix_dict$pae_plddt <- pae_plddt
             matrix_dict$symmetric_pae <- symmetric_pae
             matrix_dict$contact_matrix <- contact_matrix
-            matrix_dict$confidance_matrix <- confidance_matrix
-            matrix_dict$masked_confidance_matrix <- masked_confidance_matrix
+            matrix_dict$confidence_matrix <- confidence_matrix
+            matrix_dict$masked_confidence_matrix <- masked_confidence_matrix
             matrix_dict$masked_contact_matrix <- masked_contact_matrix
             return(matrix_dict)
         },
         print_matrix_dict = function() {
             matrix_dict <- self$extract_matrix_dict()
-            matrix_dict$masked_confidance_matrix <- NULL
+            matrix_dict$masked_confidence_matrix <- NULL
             matrix_dict$masked_contact_matrix <- NULL
             if (dir.exists(self$outdir)) {
-                feature_object_path <- file.path(self$outdir, 'matrix_info.json')
+                feature_object_path <- file.path(self$outdir, "matrix_info.json")
                 json_text <- toJSON(matrix_dict, pretty = TRUE, auto_unbox = TRUE, 
                                       force = TRUE, null = "null")
                 write(json_text, file = feature_object_path)

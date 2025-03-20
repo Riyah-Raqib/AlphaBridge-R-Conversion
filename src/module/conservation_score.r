@@ -16,7 +16,7 @@ matrix_filepath <- file.path(MATRIX_DIR, BLOSUM)
 
 PSEUDOCOUNT <- 0.0000001
 
-amino_acids <- c('A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V', '-')
+amino_acids <- c("A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S" "T", "W", "Y", "V", "-")
 iupac_alphabet <- c("A", "B", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "U", "V", "W", "Y", "Z", "X", "*", "-") 
 
 # dictionary to map from amino acid to its row/column in a similarity matrix
@@ -42,9 +42,9 @@ CONSERVATION_SCORE <- R6Class("CONSERVATION_SCORE",
     gap_cutoff = NULL,
     bg_distribution = NULL,
     
-    initialize = function(msa,
+    initialize = function(msa,""
                           s_matrix_file = matrix_filepath,
-                          scoring_function = 'js_divergence', 
+                          scoring_function = "js_divergence", 
                           window_size = 3,
                           use_gap_penalty = 1,
                           win_lam = 0.5 ,
@@ -72,12 +72,12 @@ CONSERVATION_SCORE <- R6Class("CONSERVATION_SCORE",
             window_size <- self$window_size
             win_lam <- self$win_lam
             
-            if(scoring_function == 'js_divergence'){
+            if(scoring_function == "js_divergence"){
                 scoring <- js_divergence
-            } else if(scoring_function == 'relative_entropy'){
+            } else if(scoring_function == "relative_entropy"){
                 scoring <- relative_entropy
             } else {
-                stop('Wrong scoring function')
+                stop("Wrong scoring function")
             }
             
             scores <- c()
@@ -90,7 +90,7 @@ CONSERVATION_SCORE <- R6Class("CONSERVATION_SCORE",
                 if(length(col) == length(alignment)){
                     scores[length(scores) + 1] <- scoring(col, s_matrix, bg_distribution, seq_weights, use_gap_penalty)
                 } else {
-                    stop('alginment does not have proper length')
+                    stop("Alignment does not have proper length")
                 }
             }
             
@@ -111,7 +111,7 @@ modify_alingment <- function(alignment){
         for(aa in chars){
             if(!(aa %in% iupac_alphabet)){
                 seq <- gsub(aa, "-", seq, fixed=TRUE)
-            } else if(aa %in% c('B' ,'Z','X', '*')){
+            } else if(aa %in% c("B" ,"Z","X", "*")){
                 seq <- gsub("B", "D", seq, fixed=TRUE)
                 seq <- gsub("Z", "Q", seq, fixed=TRUE)
                 seq <- gsub("X", "-", seq, fixed=TRUE)
@@ -181,7 +181,7 @@ calculate_sequence_weights <- function(msa){
             freq_counts <- rep(0, length(amino_acids))
             for(j in seq_along(msa)){
                 current_char <- substr(msa[[j]], i, i)
-                if(current_char != '-'){
+                if(current_char != "-"){
                     index <- aa_to_index[[ current_char ]]
                     freq_counts[index] <- freq_counts[index] + 1
                 }
@@ -222,7 +222,7 @@ gap_percentage <- function(col){
     num_gaps <- 0.0
 
     for(aa in col){
-        if(aa == '-'){ num_gaps <- num_gaps + 1 }
+        if(aa == "-"){ num_gaps <- num_gaps + 1 }
     }
 
     return(num_gaps / length(col))
@@ -266,7 +266,7 @@ weighted_gap_penalty <- function(col, seq_weights){
     
     gap_sum <- 0.0
     for(i in seq_along(col)){
-        if(col[i] == '-'){
+        if(col[i] == "-"){
             gap_sum <- gap_sum + seq_weights[i]
         }
     }

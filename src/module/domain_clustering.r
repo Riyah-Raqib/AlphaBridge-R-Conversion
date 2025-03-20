@@ -30,7 +30,7 @@ domain_clustering <- R6Class("domain_clustering",
     bool_mask_clusters = NULL,
     
     # __init__ method
-    initialize = function(matrix_dict, list_fasta_files, plotting = TRUE, bool_mask_clusters = TRUE, outdir = '' , alphafold_version = 'AF2'){
+    initialize = function(matrix_dict, list_fasta_files, plotting = TRUE, bool_mask_clusters = TRUE, outdir = "" , alphafold_version = "AF2"){
       self$matrix_dict <- matrix_dict
       self$list_fasta_files <- list_fasta_files
       self$plotting <- plotting
@@ -43,15 +43,15 @@ domain_clustering <- R6Class("domain_clustering",
       matrix_dict <- self$matrix_dict
       list_fasta_files <- self$list_fasta_files
       
-      matrix_input <- matrix_dict[['confidence_matrix']]
-      masked_confidance_matrix <- matrix_dict[['masked_confidence_matrix']]
-      masked_contact_matrix <- matrix_dict[['masked_contact_matrix']]
+      matrix_input <- matrix_dict[["confidence_matrix"]]
+      masked_confidence_matrix <- matrix_dict[["masked_confidence_matrix"]]
+      masked_contact_matrix <- matrix_dict[["masked_contact_matrix"]]
       
-      if (self$alphafold_version == 'AF2') {
+      if (self$alphafold_version == "AF2") {
         graph_resolution <- 0.5
         matrix_cutoff <- 2.6
-        cmap_confidance <- 'RdPu_r'
-        cmap_contact <- 'Blues_r'
+        cmap_confidance <- "RdPu_r"
+        cmap_contact <- "Blues_r"
         
         coevolutionary_domains <- get_coevolutionary_domains(matrix_input, graph_resolution = graph_resolution, matrix_cutoff = matrix_cutoff)
         
@@ -61,11 +61,11 @@ domain_clustering <- R6Class("domain_clustering",
         
         interacting_mask_cluster <- self$get_interacting_mask_cluster(coevolutionary_domains, interacting_coevultionary_cluster_dict, self$bool_mask_clusters)
         
-      } else if (self$alphafold_version == 'AF3') {
+      } else if (self$alphafold_version == "AF3") {
         
         graph_resolution <- 0.25
         matrix_cutoff <- 27
-        cmap_confidance <- 'Blues_r'
+        cmap_confidence <- "Blues_r"
         cmap_contact <- "RdPu"
         
         coevolutionary_domains <- get_coevolutionary_domains(matrix_input, graph_resolution = graph_resolution, matrix_cutoff = matrix_cutoff)
@@ -79,7 +79,7 @@ domain_clustering <- R6Class("domain_clustering",
       }
       
       if (self$plotting) {
-        plot_combination_matrix(coevolutionary_domains, masked_confidance_matrix, masked_contact_matrix,
+        plot_combination_matrix(coevolutionary_domains, masked_confidence_matrix, masked_contact_matrix,
                                 interacting_mask_cluster, list_fasta_files, self$outdir, self$alphafold_version)
         plot_separate_matrix(matrix_dict, list_fasta_files, self$outdir)
       }
@@ -117,7 +117,7 @@ domain_clustering <- R6Class("domain_clustering",
           })
           
           #build interacting_coevultionary_cluster_dict
-          cluster_group_name <- paste0('cluster_', cluster_name)
+          cluster_group_name <- paste0("cluster_", cluster_name)
           if (!(cluster_group_name %in% names(interacting_coevultionary_cluster_dict))) {
             interacting_coevultionary_cluster_dict[[cluster_group_name]] <- list(
               range_index_list = group_index_range_list,
@@ -221,7 +221,7 @@ get_coevolutionary_domains <- function(matrix_input, pae_power = 1, graph_resolu
   return(coevolutionary_domains)
 }
 
-plot_combination_matrix <- function(coevolutionary_domains, confidance_matrix, contact_matrix, interacting_mask_cluster, list_fasta_files, outdir, alphafold_version){
+plot_combination_matrix <- function(coevolutionary_domains, confidence_matrix, contact_matrix, interacting_mask_cluster, list_fasta_files, outdir, alphafold_version){
   # labels = np.array(coevolutionary_domains)
   labels <- as.numeric(coevolutionary_domains)
   # label_data = np.tile(labels, (2,1))
@@ -260,38 +260,38 @@ plot_combination_matrix <- function(coevolutionary_domains, confidance_matrix, c
   
   # Plot the main axis with confidence and contact matrices
   par(mar = c(5,5,5,5))
-  # Plot confidance_matrix first
-  image(confidance_matrix, col = brewer.pal(9, "Blues"), axes = FALSE, main = "")
+  # Plot confidence_matrix first
+  image(confidence_matrix, col = brewer.pal(9, "Blues"), axes = FALSE, main = "")
   # Overlay contact_matrix using different color map depending on alphafold_version
-  if (alphafold_version == 'AF2') {
+  if (alphafold_version == "AF2") {
     image(contact_matrix, col = rev(brewer.pal(9, "RdPu")), add = TRUE)
-  } else if (alphafold_version == 'AF3') {
+  } else if (alphafold_version == "AF3") {
     image(contact_matrix, col = brewer.pal(9, "RdPu"), add = TRUE)
   }
   
   # Add axis ticks and labels
-  axis(1, at = list_fasta_acclen/length(confidance_matrix[1,]), labels = NA, lwd.ticks = 1, col.ticks = "black")
-  axis(2, at = list_fasta_acclen/length(confidance_matrix[,1]), labels = list_fasta_len_names, las = 1)
+  axis(1, at = list_fasta_acclen/length(confidence_matrix[1,]), labels = NA, lwd.ticks = 1, col.ticks = "black")
+  axis(2, at = list_fasta_acclen/length(confidence_matrix[,1]), labels = list_fasta_len_names, las = 1)
   # Draw vertical and horizontal lines for each acclen
   for (acclen in list_fasta_acclen) {
-    abline(v = acclen/length(confidance_matrix[1,]), col = "black", lwd = 1)
-    abline(h = acclen/length(confidance_matrix[,1]), col = "black", lwd = 1)
+    abline(v = acclen/length(confidence_matrix[1,]), col = "black", lwd = 1)
+    abline(h = acclen/length(confidence_matrix[,1]), col = "black", lwd = 1)
   }
   
   # Plot colorbars using image.plot from fields
-  # Right side colorbar for confidance_matrix
+  # Right side colorbar for confidence_matrix
   par(mar = c(5,0,5,2))
-  image.plot(legend.only=TRUE, zlim=range(confidance_matrix), col=brewer.pal(9,"Blues"))
+  image.plot(legend.only=TRUE, zlim=range(confidence_matrix), col=brewer.pal(9,"Blues"))
   # Bottom colorbar for contact_matrix
   par(mar = c(2,5,2,5))
-  image.plot(legend.only=TRUE, horizontal=TRUE, zlim=range(contact_matrix), col=if(alphafold_version=='AF2') rev(brewer.pal(9,"RdPu")) else brewer.pal(9,"RdPu"))
+  image.plot(legend.only=TRUE, horizontal=TRUE, zlim=range(contact_matrix), col=if(alphafold_version=="AF2") rev(brewer.pal(9,"RdPu")) else brewer.pal(9,"RdPu"))
   
   dev.off()
 }
 
 plot_separate_matrix <- function(matrix_dict, list_fasta_files, outdir){
-  matrix_list <- c('pae','confidence_matrix','contact_matrix')
-  cmap_list <- c('Greens_r', 'Blues_r', "RdPu")
+  matrix_list <- c("pae","confidence_matrix","contact_matrix")
+  cmap_list <- c("Greens_r", "Blues_r", "RdPu")
   
   list_fasta_name <- list_fasta_files[[1]]
   list_fasta_acclen <- list_fasta_files[[2]]
@@ -313,9 +313,9 @@ plot_separate_matrix <- function(matrix_dict, list_fasta_files, outdir){
     par(mar = c(5,5,5,5))
     matrix_plot <- matrix_dict[[feature]]
     image(matrix_plot, axes = FALSE, col = switch(cmap,
-                                                  'Greens_r' = rev(brewer.pal(9, "Greens")),
-                                                  'Blues_r' = rev(brewer.pal(9, "Blues")),
-                                                  'RdPu' = brewer.pal(9, "RdPu")))
+                                                  "Greens_r" = rev(brewer.pal(9, "Greens")),
+                                                  "Blues_r" = rev(brewer.pal(9, "Blues")),
+                                                  "RdPu" = brewer.pal(9, "RdPu")))
     axis(1, at = list_fasta_acclen/length(matrix_plot[1,]), labels = NA)
     axis(1, at = list_fasta_centerticks/length(matrix_plot[1,]), labels = list_fasta_name, las = 2, cex.axis = 1.5, tick = FALSE)
     axis(2, at = (as.numeric(list_fasta_acclen)-1)/nrow(matrix_plot), labels = list_fasta_len_names, cex.axis = 1.5, las = 1)
@@ -327,9 +327,9 @@ plot_separate_matrix <- function(matrix_dict, list_fasta_files, outdir){
     
     # Add colorbar using image.plot
     image.plot(legend.only = TRUE, zlim = range(matrix_plot), col = switch(cmap,
-                                                                           'Greens_r' = rev(brewer.pal(9, "Greens")),
-                                                                           'Blues_r' = rev(brewer.pal(9, "Blues")),
-                                                                           'RdPu' = brewer.pal(9, "RdPu")))
+                                                                           "Greens_r" = rev(brewer.pal(9, "Greens")),
+                                                                           "Blues_r" = rev(brewer.pal(9, "Blues")),
+                                                                           "RdPu" = brewer.pal(9, "RdPu")))
     dev.off()
   }
 }
@@ -337,8 +337,8 @@ plot_separate_matrix <- function(matrix_dict, list_fasta_files, outdir){
 plot_joined_matrix <- function(matrix_dict, list_fasta_files, outdir){
   N_COL <- 3
   N_ROW <- 1
-  matrix_list <- c('pae','confidence_matrix','contact_matrix')
-  cmap_list <- c('Greens_r', 'Blues_r', "RdPu")
+  matrix_list <- c("pae", "confidence_matrix","contact_matrix")
+  cmap_list <- c("Greens_r", "Blues_r", "RdPu")
   
   list_fasta_name <- list_fasta_files[[1]]
   list_fasta_acclen <- list_fasta_files[[2]]
@@ -360,9 +360,9 @@ plot_joined_matrix <- function(matrix_dict, list_fasta_files, outdir){
     cmap <- cmap_list[n]
     matrix_plot <- matrix_dict[[feature]]
     image(matrix_plot, axes = FALSE, col = switch(cmap,
-                                                  'Greens_r' = rev(brewer.pal(9, "Greens")),
-                                                  'Blues_r' = rev(brewer.pal(9, "Blues")),
-                                                  'RdPu' = brewer.pal(9, "RdPu")))
+                                                  "Greens_r" = rev(brewer.pal(9, "Greens")),
+                                                  "Blues_r" = rev(brewer.pal(9, "Blues")),
+                                                  "RdPu" = brewer.pal(9, "RdPu")))
     axis(1, at = list_fasta_acclen/length(matrix_plot[1,]), labels = NA)
     axis(1, at = list_fasta_centerticks/length(matrix_plot[1,]), labels = list_fasta_name, las = 2, cex.axis = 1.5)
     axis(2, at = (as.numeric(list_fasta_acclen)-1)/nrow(matrix_plot), labels = list_fasta_len_names, cex.axis = 1.5, las = 1)
@@ -372,9 +372,9 @@ plot_joined_matrix <- function(matrix_dict, list_fasta_files, outdir){
       abline(h = i/length(matrix_plot[,1]), col = "black", lwd = 1)
     }
     image.plot(legend.only = TRUE, zlim = range(matrix_plot), col = switch(cmap,
-                                                                           'Greens_r' = rev(brewer.pal(9, "Greens")),
-                                                                           'Blues_r' = rev(brewer.pal(9, "Blues")),
-                                                                           'RdPu' = brewer.pal(9, "RdPu")))
+                                                                           "Greens_r" = rev(brewer.pal(9, "Greens")),
+                                                                           "Blues_r" = rev(brewer.pal(9, "Blues")),
+                                                                           "RdPu" = brewer.pal(9, "RdPu")))
   }
   dev.off()
 }
